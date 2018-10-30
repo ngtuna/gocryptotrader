@@ -100,7 +100,7 @@ func (k *Kraken) WsConnect() error {
 // WsSubscribeToDefaults subscribes to the websocket channels
 func (k *Kraken) WsSubscribeToDefaults() {
 	channelsToSubscribe := []string{krakenWsTicker, krakenWsTrade, krakenWsOrderbook, krakenWsOHLC, krakenWsSpread}
-	for _, pair := range k.EnabledPairs {
+	for _, pair := range k.CurrencyPairs.Spot.Enabled {
 		// Kraken WS formats pairs with / but config and REST use -
 		formattedPair := strings.ToUpper(strings.Replace(pair.String(), "-", "/", 1))
 		for _, channel := range channelsToSubscribe {
@@ -541,7 +541,7 @@ func (k *Kraken) wsProcessOrderBookPartial(channelData WebsocketChannelData, obD
 
 // wsProcessOrderBookUpdate updates an orderbook entry for a given currency pair
 func (k *Kraken) wsProcessOrderBookUpdate(channelData WebsocketChannelData, obData map[string]interface{}) {
-	ob, err := k.GetOrderbookEx(channelData.Pair, krakenWsAssetType)
+	ob, err := k.FetchOrderbook(channelData.Pair, krakenWsAssetType)
 	if err != nil {
 		k.Websocket.DataHandler <- err
 		return
